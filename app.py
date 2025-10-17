@@ -10,7 +10,7 @@ DB_CONFIG = {
     'host': 'localhost',
     'user': 'root',  # Ändra detta till ditt MySQL-användarnamn
     'password': '',  # Ändra detta till ditt MySQL-lösenord
-    'database': 'webbserv_demo'  # TODO: Ändra detta till ditt databasnamn
+    'database': 'inlamning_1'  # TODO: Ändra detta till ditt databasnamn
 }
 
 def get_db_connection():
@@ -30,13 +30,13 @@ def index():
 def login():
     # hantera POST request från inloggningsformuläret
     if request.method == 'POST':
-        username = '' # TODO: Hämta det username som POSTats med requesten
-        password = '' # TODO: Hämta det password som POSTats med requesten
-        
+        username = request.form.get('username')        
+        password = request.form.get('password')
         # Anslut till databasen
         connection = get_db_connection()
         if connection is None:
             return "Databasanslutning misslyckades", 500
+        
         
         try:
             cursor = connection.cursor(dictionary=True)
@@ -44,17 +44,16 @@ def login():
             # Fråga för att kontrollera om användare finns med matchande användarnamn
             query = "SELECT * FROM users WHERE username = %s"
             
-            # TODO: anropa databasen och hämta resultatet med cursor.fetchone() se https://www.geeksforgeeks.org/dbms/querying-data-from-a-database-using-fetchone-and-fetchall/
-            # lägg resultatet i variabeln user nedan.
-            user = # TODO: ska få värdet som är raden i databasen som returneras av query ovan.
+            cursor.execute(query, (username,))
+            user = cursor.fetchone()
             
             # Kontrollera om användaren fanns i databasen och lösenordet är korrekt.
             # Om lösenordet är korrekt så sätt sessionsvariabler och skicka tillbaka en hälsning med användarens namn.
             # Om lösenordet inte är korrekt skicka tillbaka ett felmeddelande med http-status 401.
-            if user ...: # TODO: gör klart villkoret
+            if user['username'] == username and user['password'] == password:
                 # Inloggning lyckades - spara användarinfo i session
-                ... # TODO: spara i sessionen
-                return f'Inloggning lyckades! Välkommen {...}!'
+                session['user_name'] = user['username']
+                return f'Inloggning lyckades! Välkommen {user['username']}!'
             else:
                 # Inloggning misslyckades, skicka http status 401 (Unauthorized)
                 return ('Ogiltigt användarnamn eller lösenord', 401)
