@@ -12,7 +12,7 @@ DB_CONFIG = {
     'password': '',  # Ändra detta till ditt MySQL-lösenord
     'database': 'inlamning_1'  # TODO: Ändra detta till ditt databasnamn
 }
-
+# hel
 def get_db_connection():
     """Skapa och returnera en databasanslutning"""
     try:
