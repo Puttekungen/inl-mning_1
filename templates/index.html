@@ -1,0 +1,9 @@
+{% if session.username %}
+<h1>Hola como estas {{session.name}}</h1>
+<a href="{{url_for('logout')}}">Utloggning</a>
+<br />
+{% else %}
+<h1>Babushka</h1>
+<p>Me not kno u</p>
+<a href="{{url_for('login')}}">Inloggning</a>
+{% endif %}

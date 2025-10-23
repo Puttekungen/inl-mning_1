@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session
+from flask import Flask, redirect, render_template, request, session, url_for
 import mysql.connector
 from mysql.connector import Error
 
@@ -24,9 +24,9 @@ def get_db_connection():
 
 @app.route('/')
 def index():
-    return render_template('login.html')
+    return render_template('index.html')
 
-@app.route('/login', methods=['POST'])
+@app.route('/login', methods=['POST', 'GET'])
 def login():
     # hantera POST request från inloggningsformuläret
     if request.method == 'POST':
@@ -46,14 +46,19 @@ def login():
             
             cursor.execute(query, (username,))
             user = cursor.fetchone()
+
+            if user is None:
+                return ("Ogiltigt användarnamn eller lösenord", 401)
             
             # Kontrollera om användaren fanns i databasen och lösenordet är korrekt.
             # Om lösenordet är korrekt så sätt sessionsvariabler och skicka tillbaka en hälsning med användarens namn.
             # Om lösenordet inte är korrekt skicka tillbaka ett felmeddelande med http-status 401.
             if user['username'] == username and user['password'] == password:
                 # Inloggning lyckades - spara användarinfo i session
-                session['user_name'] = user['username']
-                return f'Inloggning lyckades! Välkommen {user['username']}!'
+                session['user_id'] = user['id']
+                session['username'] = user['username']
+                session['name'] = user['name']
+                return render_template('index.html', user=user)
             else:
                 # Inloggning misslyckades, skicka http status 401 (Unauthorized)
                 return ('Ogiltigt användarnamn eller lösenord', 401)
@@ -66,6 +71,12 @@ def login():
             if connection.is_connected():
                 cursor.close()
                 connection.close()
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.run(debug=True)
